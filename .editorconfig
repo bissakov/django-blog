@@ -1,0 +1,12 @@
+[html]
+indent_size = 4
+indent_style = spaces
+
+[htmldjango]
+indent_size = 4
+indent_style = spaces
+
+
+[python]
+indent_size = 4
+indent_style = spaces

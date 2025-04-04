@@ -1,5 +1,8 @@
 .git/
 venv/
+migrations/
 
+*.pyc
 .env
+*.sqlite3
 
