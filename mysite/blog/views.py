@@ -2,10 +2,11 @@ from django.core.mail import send_mail
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import ListView
 
-from .forms import EmailPostForm
-from .models import Post
+from .forms import CommentForm, EmailPostForm
+from .models import Comment, Post
 
 
 class PostListView(ListView):
@@ -42,8 +43,26 @@ def post_detail(
         slug=slug,
         status=Post.Status.PUBLISHED,
     )
-    context = {"post": post}
+    comments = Comment.objects.filter(post=post, active=True).all()
+    form = CommentForm()
+    context = {"post": post, "comments": comments, "form": form}
     return render(request, "blog/post/detail.html", context)
+
+
+@require_POST
+def post_comment(request: HttpRequest, post_id: int) -> HttpResponse:
+    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)
+    comment = None
+
+    form = CommentForm(data=request.POST)
+
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.save()
+
+    context = {"post": post, "form": form, "comment": comment}
+    return render(request, "blog/post/comment.html", context)
 
 
 def post_share(request: HttpRequest, post_id: int) -> HttpResponse:
